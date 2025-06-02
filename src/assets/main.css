@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  background-color: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 3px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569; /* slate-600 */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* slate-400 */
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* slate-500 */
+}
+
+/* Prose Chat Styles (Global or :deep in MessageBubble) */
+.prose-chat {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.prose-chat p {
+  margin-bottom: 0.75em;
+}
+.prose-chat strong {
+  font-weight: 600;
+}
+.prose-chat em {
+  font-style: italic;
+}
+.prose-chat ul,
+.prose-chat ol {
+  margin-left: 1.25em;
+  margin-bottom: 0.75em;
+  list-style-position: outside;
+}
+.prose-chat ul {
+  list-style-type: disc;
+}
+.prose-chat ol {
+  list-style-type: decimal;
+}
+.prose-chat li {
+  margin-bottom: 0.25em;
+}
+.prose-chat blockquote {
+  border-left: 4px solid #60a5fa; /* blue-400 */
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  color: #9ca3af; /* gray-400 */
+}
+.dark .prose-chat blockquote {
+  border-left-color: #3b82f6; /* blue-500 */
+  color: #6b7280; /* gray-500 */
+}
+.prose-chat pre {
+  background-color: #2d2d2d; /* Atom One Dark pre bg */
+  color: #abb2bf; /* Atom One Dark pre text */
+  padding: 1em;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  position: relative;
+  margin: 1em 0;
+  font-size: 0.875em;
+}
+.dark .prose-chat pre {
+    background-color: #282c34; /* A common dark theme pre bg */
+}
+.prose-chat pre code.hljs {
+  padding: 0;
+  background: transparent;
+}
+.prose-chat code:not(pre code) {
+  background-color: rgba(100, 116, 139, 0.1); /* slate-500 with alpha */
+  color: #475569; /* slate-600 */
+  padding: 0.1em 0.3em;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+}
+.dark .prose-chat code:not(pre code) {
+  background-color: rgba(100, 116, 139, 0.2); /* slate-500 with more alpha for dark */
+  color: #cbd5e1; /* slate-300 */
+}
+.prose-chat table {
+  width: auto; /* Changed from auto to full for better responsiveness */
+  font-size: 0.875em;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+.prose-chat th,
+.prose-chat td {
+  border: 1px solid #d1d5db; /* gray-300 */
+  padding: 0.5em 0.75em;
+}
+.dark .prose-chat th,
+.dark .prose-chat td {
+  border-color: #4b5563; /* gray-600 */
+}
+.prose-chat th {
+  background-color: #f3f4f6; /* gray-100 */
+}
+.dark .prose-chat th {
+  background-color: #374151; /* gray-700 */
+}
+
+.copy-code-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: rgba(75, 85, 99, 0.7); /* gray-600 with alpha */
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  opacity: 0.7;
+}
+.copy-code-button:hover {
+  background-color: rgba(55, 65, 81, 0.9); /* gray-700 with alpha */
+  opacity: 1;
+}
+.dark .copy-code-button {
+    background-color: rgba(100, 116, 139, 0.7); /* slate-500 with alpha */
+}
+.dark .copy-code-button:hover {
+    background-color: rgba(71, 85, 105, 0.9); /* slate-600 with alpha */
+}
+
+/* Message Bubbles - these are also in MessageBubble.vue, ensure consistency or make global */
+.message-avatar {
+    width: 2rem; height: 2rem; border-radius: 9999px; display: flex;
+    align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600; flex-shrink: 0;
+}
+.message-avatar-user { background-color: #93c5fd; color: #1e40af; } /* blue-300, blue-800 */
+.dark .message-avatar-user { background-color: #60a5fa; color: #dbeafe; } /* blue-400, blue-50 */
+.message-avatar-ai { background-color: #a5f3fc; color: #0e7490; } /* cyan-200, cyan-700 */
+.dark .message-avatar-ai { background-color: #67e8f9; color: #ecfeff; } /* cyan-300, cyan-50 */
+
+.message-bubble { max-width: 75%; word-wrap: break-word; }
+.message-bubble-user { background-color: #3b82f6; color: white; border-radius: 1rem 1rem 0.25rem 1rem; } /* blue-500 */
+.dark .message-bubble-user { background-color: #2563eb; } /* blue-600 */
+.message-bubble-ai { background-color: #e5e7eb; color: #1f2937; border-radius: 1rem 1rem 1rem 0.25rem; } /* gray-200, gray-800 */
+.dark .message-bubble-ai { background-color: #374151; color: #f3f4f6; } /* gray-700, gray-100 */
+
+/* Settings Modal Range Input Thumb */
+#temperatureInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #fb923c; /* orange-400 */
+  cursor: pointer;
+  border-radius: 50%;
+  margin-top: -7px; /* (track_height - thumb_height) / 2 assuming track height is 4px */
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+#temperatureInput::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #fb923c; /* orange-400 */
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+.dark #temperatureInput::-webkit-slider-thumb {
+  background: #f97316; /* orange-500 */
+}
+.dark #temperatureInput::-moz-range-thumb {
+  background: #f97316; /* orange-500 */
+}
+#temperatureInput::-webkit-slider-runnable-track {
+  height: 4px;
+}
+#temperatureInput::-moz-range-track {
+  height: 4px;
+}
