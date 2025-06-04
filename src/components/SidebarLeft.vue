@@ -82,6 +82,13 @@
           <font-awesome-icon icon="id-card" class="text-sm" />
           <span class="text-sm">Thông tin nhà phát triển</span>
         </div>
+        <div
+          @click="isFeedbackModalOpen = true"
+          class="flex items-center space-x-3 px-3 py-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+        >
+          <font-awesome-icon icon="lightbulb" class="text-sm" />
+          <span class="text-sm">Góp ý</span>
+        </div>
       </div>
       <div class="flex items-center justify-between mt-4 p-3">
         <span class="text-sm text-gray-600 dark:text-slate-300">Chế độ giao diện</span>
@@ -114,12 +121,16 @@
   </div>
   <!-- Developer Info Modal -->
   <DeveloperInfoModal :isOpen="isDeveloperInfoModalOpen" @close="isDeveloperInfoModalOpen = false" />
+
+  <!-- Feedback Modal -->
+  <FeedbackModal :isOpen="isFeedbackModalOpen" @close="isFeedbackModalOpen = false" @submitFeedback="handleFeedbackSubmit" />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useTheme } from '@/composables/useTheme';
 import DeveloperInfoModal from './DeveloperInfoModal.vue';
+import FeedbackModal from './FeedbackModal.vue';
 
 defineEmits(['newChat', 'openSettings', 'selectMenuItem']);
 
@@ -133,6 +144,13 @@ const props = defineProps({
 const { theme: currentTheme, toggleTheme } = useTheme();
 
 const isDeveloperInfoModalOpen = ref(false);
+const isFeedbackModalOpen = ref(false);
+
+const handleFeedbackSubmit = (feedbackData) => {
+  console.log('Feedback Submitted:', feedbackData);
+  // Here you would typically send the feedbackData to your backend
+  alert('Cảm ơn bạn đã gửi góp ý!');
+};
 </script>
 
 <style scoped>
