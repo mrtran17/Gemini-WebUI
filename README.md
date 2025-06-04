@@ -15,8 +15,7 @@ This template should help get you started developing with Vue 3 in Vite.
 
 1.  **Clone repository** (Nếu bạn chưa có mã nguồn):
     ```bash
-    # Thay thế <repository_url> bằng URL kho chứa mã nguồn của bạn
-    git clone <repository_url>
+    git clone https://github.com/mrtran17/Gemini-WebUI.git
     cd my-project
     ```
 
