@@ -57,7 +57,7 @@
               <font-awesome-icon icon="robot" />
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-3">
-              Chào mừng đến với Gemini WebUI!
+              Chào mừng đến với CatUI!
             </h1>
             <p class="text-gray-600 dark:text-slate-300 mb-8 max-w-md">
               Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới.

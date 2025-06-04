@@ -1,11 +1,11 @@
 <template>
   <div class="w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col shrink-0">
     <div class="p-4">
-      <div class="flex items-center space-x-2">
-        <div class="w-8 h-8 bg-black dark:bg-slate-700 rounded-lg flex items-center justify-center text-white dark:text-slate-300">
-          <font-awesome-icon icon="cat" class="text-lg" />
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 bg-blue-600 dark:bg-slate-700 rounded-lg flex items-center justify-center text-white dark:text-slate-300">
+          <img src="@/assets/rocket.svg" alt="Rocket Logo" class="w-8 h-8" />
         </div>
-        <span class="font-semibold text-lg text-gray-900 dark:text-slate-100">WebUI LLM</span>
+        <span class="font-semibold text-2xl text-gray-900 dark:text-slate-100">CatUI LLM</span>
       </div>
     </div>
 
