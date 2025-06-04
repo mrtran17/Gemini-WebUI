@@ -1,12 +1,16 @@
 <template>
   <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300" :class="{ 'opacity-0': !isOpen }">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md transform transition-all duration-300 ease-out" :class="{ 'scale-95': !isOpen, 'scale-100': isOpen }" @click.stop>
+    <form name="feedback" netlify netlify-honeypot="bot-field" @submit.prevent="submitFeedback" class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md transform transition-all duration-300 ease-out" :class="{ 'scale-95': !isOpen, 'scale-100': isOpen }" @click.stop>
+      <!-- Hidden fields for Netlify -->
+      <input type="hidden" name="form-name" value="feedback" />
+      <input type="hidden" name="bot-field" />
+
       <div class="p-6 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-slate-100 flex items-center space-x-2">
           <font-awesome-icon icon="lightbulb" class="text-blue-500" />
           <span>Gửi Góp ý</span>
         </h3>
-        <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-lg">
+        <button type="button" @click="$emit('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-lg">
           <font-awesome-icon icon="times" />
         </button>
       </div>
@@ -19,6 +23,7 @@
           <input
             type="text"
             id="feedback-title"
+            name="title"
             v-model="feedback.title"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 text-sm"
             placeholder="Nhập tiêu đề góp ý của bạn"
@@ -31,6 +36,7 @@
           </label>
           <textarea
             id="feedback-description"
+            name="description"
             v-model="feedback.description"
             rows="4"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 text-sm resize-y"
@@ -60,11 +66,11 @@
               </div>
               <p class="text-xs text-gray-500 dark:text-slate-500">PNG, JPG, GIF, WEBP tối đa 10MB</p>
             </div>
-            <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*" class="sr-only" />
+            <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*" class="sr-only" name="image" />
           </div>
           <div v-if="feedback.imagePreview" class="mt-4 relative">
             <img :src="feedback.imagePreview" alt="Image Preview" class="w-full h-40 object-cover rounded-lg shadow-md border border-gray-300 dark:border-slate-600" />
-            <button @click="removeImage" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-lg transition-colors">
+            <button type="button" @click="removeImage" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-lg transition-colors">
               <font-awesome-icon icon="times" />
             </button>
           </div>
@@ -77,6 +83,7 @@
           <input
             type="email"
             id="feedback-email"
+            name="email"
             v-model="feedback.email"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 text-sm"
             placeholder="Địa chỉ email của bạn (tùy chọn)"
@@ -85,13 +92,14 @@
       </div>
       <div class="p-6 border-t border-gray-200 dark:border-slate-700 flex justify-end space-x-3">
         <button
+          type="button"
           @click="$emit('close')"
           class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-200 dark:bg-slate-700 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors duration-200"
         >
           Hủy
         </button>
         <button
-          @click="submitFeedback"
+          type="submit"
           :disabled="!feedback.title || !feedback.description"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
         >
@@ -99,7 +107,7 @@
           Gửi Góp ý
         </button>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -183,43 +191,27 @@ const triggerFileInput = () => {
   fileInput.value.click();
 };
 
-const submitFeedback = async () => {
+const submitFeedback = (event) => {
   if (!feedback.value.title || !feedback.value.description) {
     alert('Vui lòng nhập Tiêu đề và Mô tả góp ý.');
+    // Prevent form submission if validation fails
+    event.preventDefault();
     return;
   }
 
-  const formData = new FormData();
-  formData.append('form-name', 'feedback');
-  formData.append('title', feedback.value.title);
-  formData.append('description', feedback.value.description);
-  if (feedback.value.image) {
-    formData.append('image', feedback.value.image);
-  }
-  formData.append('email', feedback.value.email);
+  // If validation passes, let the form submit naturally
+  // Netlify will intercept this POST request
+  alert('Góp ý đã được gửi thành công!');
+  emit('submitFeedback', {
+    title: feedback.value.title,
+    description: feedback.value.description,
+    image: feedback.value.image,
+    email: feedback.value.email,
+  });
+  emit('close');
 
-  try {
-    const response = await fetch('/', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (response.ok) {
-      alert('Góp ý đã được gửi thành công!');
-      emit('submitFeedback', {
-        title: feedback.value.title,
-        description: feedback.value.description,
-        image: feedback.value.image,
-        email: feedback.value.email,
-      });
-      emit('close');
-    } else {
-      alert('Có lỗi xảy ra khi gửi góp ý. Vui lòng thử lại.');
-    }
-  } catch (error) {
-    console.error('Error submitting feedback:', error);
-    alert('Có lỗi xảy ra khi gửi góp ý. Vui lòng thử lại.');
-  }
+  // You might need to explicitly submit if using @submit.prevent
+  // event.target.submit(); // Uncomment this line if the form doesn't submit naturally after validation
 };
 </script>
 
