@@ -130,11 +130,11 @@ const { theme: currentTheme, toggleTheme } = useTheme();
 const isDeveloperInfoModalOpen = ref(false);
 const isFeedbackModalOpen = ref(false);
 
-const handleFeedbackSubmit = (feedbackData) => {
-  console.log('Feedback Submitted:', feedbackData);
-  // Here you would typically send the feedbackData to your backend
-  alert('Cảm ơn bạn đã gửi góp ý!');
-};
+// const handleFeedbackSubmit = (feedbackData) => {
+//   console.log('Feedback Submitted:', feedbackData);
+//   // Here you would typically send the feedbackData to your backend
+//   alert('Cảm ơn bạn đã gửi góp ý!');
+// };
 </script>
 
 <style scoped>
