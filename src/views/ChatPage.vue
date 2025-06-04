@@ -8,7 +8,7 @@
         :getModelDisplayNameExt="getModelDisplayName" @send-message="handleSendMessage"
         @model-changed="handleModelChange" ref="chatViewRef" :active-model-id="currentConversation?.model" />
       <ProjectTableView v-if="selectedMenuItem === 'project'" />
-      <MathSolverView v-if="selectedMenuItem === 'math-solver'" :api-key="apiKey" />
+
       <!-- Add other views here as needed, e.g., for 'templates' -->
     </div>
     <SidebarRightConversationList :conversations="sortedConversationsArray"
@@ -23,7 +23,6 @@ import SidebarLeft from '../components/SidebarLeft.vue';
 import ChatView from '../components/ChatView.vue'; // Giả sử chat.vue được đổi tên hoặc import đúng
 import SidebarRightConversationList from '../components/SidebarRightConversationList.vue';
 import ProjectTableView from '../views/ProjectTableView.vue'; // Import the new component
-import MathSolverView from '../views/MathSolverView.vue'; // Import the new math solver component
 
 import { useSettings } from '../composables/useSettings';
 import { useConversations } from '../composables/useConversations';

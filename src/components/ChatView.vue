@@ -93,10 +93,15 @@
                   :disabled="isLoadingIndicator || (!messageInput.trim() && !attachedFile)"
                   class="send-button"
                 >
+                  <span v-if="isLoadingIndicator" class="loading-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </span>
                   <font-awesome-icon
+                    v-else
                     class="text-base"
-                    :icon="isLoadingIndicator ? 'spinner' : 'paper-plane'"
-                    :spin="isLoadingIndicator"
+                    icon="paper-plane"
                   />
                 </button>
               </div>
@@ -522,5 +527,33 @@ onUnmounted(() => {
   }
   .action-button span { @apply hidden; }
   .character-count { @apply text-center; }
+}
+
+/* New styles for loading dots */
+.loading-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  margin: 0 1px;
+  background-color: white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: fade-dots 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes fade-dots {
+  0%, 80%, 100% { opacity: 0; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
 }
 </style>

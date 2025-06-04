@@ -2,13 +2,8 @@
   <div class="w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col shrink-0">
     <div class="p-4">
       <div class="flex items-center space-x-2">
-        <div class="w-8 h-8 bg-black dark:bg-slate-700 rounded-lg flex items-center justify-center">
-          <div class="w-4 h-4 bg-white dark:bg-slate-300 rounded-sm grid grid-cols-2 gap-0.5">
-            <div class="bg-black dark:bg-slate-700 rounded-sm"></div>
-            <div class="bg-black dark:bg-slate-700 rounded-sm"></div>
-            <div class="bg-black dark:bg-slate-700 rounded-sm"></div>
-            <div class="bg-black dark:bg-slate-700 rounded-sm"></div>
-          </div>
+        <div class="w-8 h-8 bg-black dark:bg-slate-700 rounded-lg flex items-center justify-center text-white dark:text-slate-300">
+          <font-awesome-icon icon="cat" class="text-lg" />
         </div>
         <span class="font-semibold text-lg text-gray-900 dark:text-slate-100">WebUI LLM</span>
       </div>
@@ -37,18 +32,7 @@
         <font-awesome-icon icon="comments" class="text-sm" />
         <span class="text-sm font-medium">AI Chat</span>
       </div>
-      <div
-        :class="[
-          'flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer',
-          selectedMenuItem === 'math-solver'
-            ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300'
-            : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700',
-        ]"
-        @click="$emit('selectMenuItem', 'math-solver')"
-      >
-        <font-awesome-icon icon="calculator" class="text-sm" />
-        <span class="text-sm">AI Giải Toán</span>
-      </div>
+
       <div
         :class="[
           'flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer',
