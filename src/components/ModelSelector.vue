@@ -73,7 +73,7 @@ const selectedModelDisplayName = computed(() => {
     // If no current model, and available models exist, maybe show a generic or first model text? Let's stick to "Select Model" if none is selected.
     // Fallback to the first available model's name is not needed for display text here.
 
-    return "Select Model"; // Default text if no model is selected
+    return "Chọn mô hình AI"; // Default text if no model is selected
 });
 
 const selectModel = (modelValue) => {

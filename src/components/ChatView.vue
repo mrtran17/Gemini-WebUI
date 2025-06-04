@@ -31,104 +31,165 @@
         class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
         :class="[isPreviewPaneOpen ? 'w-[60%] sm:w-1/2' : 'w-full']"
       >
+          <!-- Case 1: No API Key -->
           <div
-            v-if="!apiKeyPresent || (!currentConversation && apiKeyPresent)"
-            class="flex-1 flex flex-col items-center justify-center text-center px-4 md:px-6 pt-4 md:pt-6 pb-0"
+            v-if="!apiKeyPresent"
+            class="flex-1 flex flex-col items-center justify-center text-center px-4 md:px-6 pt-4 md:pt-6"
           >
             <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6 text-white text-3xl">
               <font-awesome-icon icon="robot" />
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-3">
-              {{ !apiKeyPresent ? 'Vui lòng cấu hình API Key' : 'Chào mừng đến với Gemini WebUI!' }}
+              Vui lòng cấu hình API Key
             </h1>
             <p class="text-gray-600 dark:text-slate-300 mb-8 max-w-md">
-              {{ !apiKeyPresent ? 'Mở Cài đặt để thêm API Key và bắt đầu.' : 'Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới.' }}
+              Mở Cài đặt để thêm API Key và bắt đầu.
             </p>
           </div>
+
+          <!-- Case 2: API Key Present, NO Active Conversation (Grok-like layout) -->
           <div
-            v-else-if="currentConversation"
-            ref="chatMessagesContainerRef"
-            class="flex-1 overflow-y-auto no-scrollbar space-y-4 px-4 md:px-6 pt-4 md:pt-6 pb-0"
+            v-else-if="apiKeyPresent && !currentConversation"
+            class="flex-1 flex flex-col items-center justify-center text-center px-4 md:px-6 pt-4 md:pt-6"
           >
-            <MessageBubble
-              v-for="msg in currentConversation.messages"
-              :key="msg.id"
-              :message="msg"
-              @preview-html="handlePreviewHtmlRequest"
-            />
-            <div v-if="isLoadingIndicator" class="flex items-start space-x-3 py-1 justify-start w-[90%] mx-auto">
-              <div class="message-avatar message-avatar-ai"><font-awesome-icon icon="robot" /></div>
-              <div class="p-3 message-bubble message-bubble-ai">
-                  <div class="flex items-center space-x-1.5">
-                      <div v-for="i in 3" :key="i" class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse" :style="{ animationDelay: `${(i-1) * 0.15}s` }"></div>
+            <!-- Welcome Message Content -->
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6 text-white text-3xl">
+              <font-awesome-icon icon="robot" />
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-3">
+              Chào mừng đến với Gemini WebUI!
+            </h1>
+            <p class="text-gray-600 dark:text-slate-300 mb-8 max-w-md">
+              Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới.
+            </p>
+
+            <!-- INPUT AREA (Rendered here, as part of the centered content) -->
+            <div class="w-full max-w-2xl mt-2 sm:mt-4"> <!-- Adjusted margin for better spacing -->
+              <!-- Image Preview -->
+              <div v-if="attachedFilePreview" class="mb-3 relative max-w-[150px] max-h-[100px] mx-auto">
+                <img :src="attachedFilePreview" alt="Selected Image" class="max-w-full max-h-[100px] rounded-lg border border-gray-300 dark:border-slate-600" />
+                <button @click="removeAttachedFile" title="Xoá ảnh" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center cursor-pointer shadow-lg transition-colors">
+                  <font-awesome-icon icon="times" />
+                </button>
+              </div>
+              <!-- Main Input Container -->
+              <div class="new-input-container">
+                <div class="input-wrapper">
+                  <textarea
+                    v-model="messageInput"
+                    placeholder="Nhập tin nhắn của bạn ở đây..."
+                    class="message-input"
+                    rows="1"
+                    @keypress.enter.exact.prevent="submitSendMessage"
+                    @input="adjustTextareaHeight"
+                    @paste="handlePaste"
+                    ref="textareaRef"
+                    :disabled="isLoadingIndicator"
+                  ></textarea>
+                  <button
+                    @click="submitSendMessage"
+                    :disabled="isLoadingIndicator || (!messageInput.trim() && !attachedFile)"
+                    class="send-button"
+                  >
+                    <span v-if="isLoadingIndicator" class="loading-dots">
+                      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </span>
+                    <font-awesome-icon v-else class="text-base" icon="paper-plane" />
+                  </button>
+                </div>
+                <div class="action-bar">
+                  <div class="flex items-center space-x-4">
+                    <input type="file" id="imageUploadWelcome" accept="image/png, image/jpeg, image/webp, image/gif" class="hidden" @change="handleFileSelect" ref="imageUploadRefWelcome" />
+                    <button @click="() => imageUploadRefWelcome?.click()" class="action-button" :disabled="isLoadingIndicator" title="Đính kèm ảnh">
+                      <font-awesome-icon icon="paperclip" /> <span>Đính kèm tệp</span>
+                    </button>
+                    <button class="action-button" :disabled="isLoadingIndicator" title="Tin nhắn tự động">
+                      <font-awesome-icon icon="microphone" /> <span>Ghi âm</span>
+                    </button>
+                    <button class="action-button" :disabled="isLoadingIndicator" title="Duyệt prompts" @click="isPromptModalOpen = true">
+                      <font-awesome-icon icon="search" /> <span>Prompt mẫu</span>
+                    </button>
                   </div>
+                  <div class="character-count">{{ messageInput.length }}/3,000</div>
+                </div>
               </div>
             </div>
           </div>
-        <!-- Input Area -->
-        <div class="shrink-0 px-4 md:px-6 pt-0 pb-4 w-[90%] mx-auto" v-if="apiKeyPresent">
-            <!-- Image Preview (existing) -->
-            <div v-if="attachedFilePreview" class="mb-3 relative max-w-[150px] max-h-[100px]">
-              <img :src="attachedFilePreview" alt="Selected Image" class="max-w-full max-h-[100px] rounded-lg border border-gray-300 dark:border-slate-600" />
-              <button @click="removeAttachedFile" title="Xoá ảnh" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center cursor-pointer shadow-lg transition-colors">
-                <font-awesome-icon icon="times" />
-              </button>
+
+          <!-- Case 3: API Key Present, Active Conversation -->
+          <template v-else-if="apiKeyPresent && currentConversation">
+            <!-- Chat Messages -->
+            <div
+              ref="chatMessagesContainerRef"
+              class="flex-1 overflow-y-auto no-scrollbar space-y-4 px-4 md:px-6 pt-4 md:pt-6 pb-0"
+            >
+              <MessageBubble
+                v-for="msg in currentConversation.messages"
+                :key="msg.id"
+                :message="msg"
+                @preview-html="handlePreviewHtmlRequest"
+              />
+              <div v-if="isLoadingIndicator" class="flex items-start space-x-3 py-1 justify-start w-[90%] mx-auto">
+                <div class="message-avatar message-avatar-ai"><font-awesome-icon icon="robot" /></div>
+                <div class="p-3 message-bubble message-bubble-ai">
+                    <div class="flex items-center space-x-1.5">
+                        <div v-for="i in 3" :key="i" class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-pulse" :style="{ animationDelay: `${(i-1) * 0.15}s` }"></div>
+                    </div>
+                </div>
+              </div>
             </div>
-            <!-- Main Input Container (existing) -->
-            <div class="new-input-container">
-              <div class="input-wrapper">
-                <textarea
-                  v-model="messageInput"
-                  placeholder="Nhập tin nhắn của bạn ở đây..."
-                  class="message-input"
-                  rows="1"
-                  @keypress.enter.exact.prevent="submitSendMessage"
-                  @input="adjustTextareaHeight"
-                  @paste="handlePaste"
-                  ref="textareaRef"
-                  :disabled="isLoadingIndicator"
-                ></textarea>
-                <button
-                  @click="submitSendMessage"
-                  :disabled="isLoadingIndicator || (!messageInput.trim() && !attachedFile)"
-                  class="send-button"
-                >
-                  <span v-if="isLoadingIndicator" class="loading-dots">
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                  </span>
-                  <font-awesome-icon
-                    v-else
-                    class="text-base"
-                    icon="paper-plane"
-                  />
+            <!-- INPUT AREA (Rendered at the bottom) -->
+            <div class="shrink-0 px-4 md:px-6 pt-0 pb-4 w-[90%] mx-auto">
+              <!-- Image Preview -->
+              <div v-if="attachedFilePreview" class="mb-3 relative max-w-[150px] max-h-[100px]">
+                <img :src="attachedFilePreview" alt="Selected Image" class="max-w-full max-h-[100px] rounded-lg border border-gray-300 dark:border-slate-600" />
+                <button @click="removeAttachedFile" title="Xoá ảnh" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center cursor-pointer shadow-lg transition-colors">
+                  <font-awesome-icon icon="times" />
                 </button>
               </div>
-              <div class="action-bar">
-                <div class="flex items-center space-x-4">
-                  <input
-                    type="file"
-                    id="imageUpload"
-                    accept="image/png, image/jpeg, image/webp, image/gif"
-                    class="hidden"
-                    @change="handleFileSelect"
-                    ref="imageUploadRef"
-                  />
-                  <button @click="triggerImageUpload" class="action-button" :disabled="isLoadingIndicator" title="Đính kèm ảnh">
-                    <font-awesome-icon icon="paperclip" /> <span>Đính kèm tệp</span>
-                  </button>
-                  <button class="action-button" :disabled="isLoadingIndicator" title="Tin nhắn tự động">
-                    <font-awesome-icon icon="microphone" /> <span>Ghi âm</span>
-                  </button>
-                  <button class="action-button" :disabled="isLoadingIndicator" title="Duyệt prompts" @click="isPromptModalOpen = true">
-                    <font-awesome-icon icon="search" /> <span>Prompt mẫu</span>
+              <!-- Main Input Container -->
+              <div class="new-input-container">
+                <div class="input-wrapper">
+                  <textarea
+                    v-model="messageInput"
+                    placeholder="Nhập tin nhắn của bạn ở đây..."
+                    class="message-input"
+                    rows="1"
+                    @keypress.enter.exact.prevent="submitSendMessage"
+                    @input="adjustTextareaHeight"
+                    @paste="handlePaste"
+                    ref="textareaRef"
+                    :disabled="isLoadingIndicator"
+                  ></textarea>
+                  <button
+                    @click="submitSendMessage"
+                    :disabled="isLoadingIndicator || (!messageInput.trim() && !attachedFile)"
+                    class="send-button"
+                  >
+                    <span v-if="isLoadingIndicator" class="loading-dots">
+                      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </span>
+                    <font-awesome-icon v-else class="text-base" icon="paper-plane" />
                   </button>
                 </div>
-                <div class="character-count">{{ messageInput.length }}/3,000</div>
+                <div class="action-bar">
+                  <div class="flex items-center space-x-4">
+                    <input type="file" id="imageUploadChat" accept="image/png, image/jpeg, image/webp, image/gif" class="hidden" @change="handleFileSelect" ref="imageUploadRefChat" />
+                    <button @click="() => imageUploadRefChat?.click()" class="action-button" :disabled="isLoadingIndicator" title="Đính kèm ảnh">
+                      <font-awesome-icon icon="paperclip" /> <span>Đính kèm tệp</span>
+                    </button>
+                    <button class="action-button" :disabled="isLoadingIndicator" title="Tin nhắn tự động">
+                      <font-awesome-icon icon="microphone" /> <span>Ghi âm</span>
+                    </button>
+                    <button class="action-button" :disabled="isLoadingIndicator" title="Duyệt prompts" @click="isPromptModalOpen = true">
+                      <font-awesome-icon icon="search" /> <span>Prompt mẫu</span>
+                    </button>
+                  </div>
+                  <div class="character-count">{{ messageInput.length }}/3,000</div>
+                </div>
               </div>
             </div>
-        </div>
+          </template>
       </div>
 
       <!-- HTML Preview Pane (Conditionally rendered on the right) -->
@@ -203,8 +264,12 @@ const messageInput = ref('');
 const attachedFile = ref(null);
 const attachedFilePreview = ref(null);
 const isPromptModalOpen = ref(false);
-const textareaRef = ref(null);
-const imageUploadRef = ref(null);
+
+// Refs for input elements - need to be dynamic if input is duplicated
+const textareaRef = ref(null); // This will point to the active textarea
+const imageUploadRefWelcome = ref(null);
+const imageUploadRefChat = ref(null);
+
 const chatMessagesContainerRef = ref(null);
 
 // --- State for HTML Preview Pane ---
@@ -228,15 +293,15 @@ const isModelMultimodal = (modelId) => {
     return ["flash", "vision", "1.5-pro", "gemma"].some(term => modelId?.includes(term));
 };
 
-const adjustTextareaHeight = () => { /* ... existing ... */
+const adjustTextareaHeight = () => {
   if (textareaRef.value) {
     textareaRef.value.style.height = 'auto';
-    let newHeight = Math.min(textareaRef.value.scrollHeight, 120);
+    let newHeight = Math.min(textareaRef.value.scrollHeight, 120); // Max height 120px
     textareaRef.value.style.overflowY = newHeight === 120 ? 'auto' : 'hidden';
     textareaRef.value.style.height = `${newHeight}px`;
   }
 };
-const scrollToBottom = () => { /* ... existing ... */
+const scrollToBottom = () => {
   nextTick(() => {
     if (chatMessagesContainerRef.value) {
       chatMessagesContainerRef.value.scrollTop = chatMessagesContainerRef.value.scrollHeight;
@@ -246,6 +311,7 @@ const scrollToBottom = () => { /* ... existing ... */
 
 watch(() => props.currentConversation?.messages, scrollToBottom, { deep: true });
 watch(() => props.isLoadingIndicator, (newVal) => { if(newVal) scrollToBottom(); });
+watch(messageInput, adjustTextareaHeight);
 
 
 // --- HTML Preview Pane Logic ---
@@ -282,6 +348,7 @@ const updatePreviewIframeContent = () => {
       ${previewPaneUseTailwindCDN.value ? '<script src="https://cdn.tailwindcss.com"><\/script>' : ''}
       ${previewPaneUseTailwindCDN.value && currentAppTheme === 'dark' ? `
       <script>
+        // if (typeof tailwind !== 'undefined') { tailwind.config = { darkMode: 'class' }; }
       <\/script>
       ` : ''}
       <style>
@@ -327,25 +394,27 @@ watch(isPreviewPaneOpen, (isOpen) => {
 
 let iframeThemeObserver = null;
 
-const handleFileSelect = (event) => { 
+const handleFileSelect = (event) => {
   const file = event.target.files[0];
+  const currentImageUploadRef = event.target.id === 'imageUploadWelcome' ? imageUploadRefWelcome.value : imageUploadRefChat.value;
+
   if (!file) return;
 
   if (!props.apiKeyPresent) {
     showToast('Vui lòng cung cấp API Key trong Cài đặt.', 'warn');
-    imageUploadRef.value.value = '';
+    if (currentImageUploadRef) currentImageUploadRef.value = '';
     return;
   }
 
-  const currentModel = props.currentConversation?.model || props.availableModels[0]?.value;
+  const currentModel = props.currentConversation?.model || props.activeModelId || props.availableModels[0]?.value;
   if (!isModelMultimodal(currentModel)) {
     showToast(`Model "${props.getModelDisplayNameExt(currentModel)}" không hỗ trợ ảnh.`, 'warn');
-    imageUploadRef.value.value = '';
+    if (currentImageUploadRef) currentImageUploadRef.value = '';
     return;
   }
   if (!file.type.startsWith("image/")) {
     showToast("Chỉ chấp nhận tệp ảnh (PNG, JPG, WEBP, GIF).", "warn");
-    imageUploadRef.value.value = '';
+    if (currentImageUploadRef) currentImageUploadRef.value = '';
     return;
   }
 
@@ -360,9 +429,10 @@ const handleFileSelect = (event) => {
     attachedFilePreview.value = e.target.result;
   };
   reader.readAsDataURL(file);
-  imageUploadRef.value.value = '';
+  if (currentImageUploadRef) currentImageUploadRef.value = ''; // Clear file input
 };
-const handlePaste = (event) => { 
+
+const handlePaste = (event) => {
   const items = event.clipboardData?.items;
   if (items) {
     for (let i = 0; i < items.length; i++) {
@@ -370,7 +440,10 @@ const handlePaste = (event) => {
         const file = items[i].getAsFile();
         if (file) {
           event.preventDefault();
-          const syntheticEvent = { target: { files: [file] } };
+          // Create a synthetic event to pass to handleFileSelect
+          // Determine which input ref is active, though it might not matter much here
+          const activeImageUploadRef = (props.apiKeyPresent && !props.currentConversation) ? imageUploadRefWelcome.value : imageUploadRefChat.value;
+          const syntheticEvent = { target: { files: [file], id: activeImageUploadRef?.id || 'imageUploadChat' } };
           handleFileSelect(syntheticEvent);
           break;
         }
@@ -378,43 +451,52 @@ const handlePaste = (event) => {
     }
   }
 };
-const removeAttachedFile = () => { 
+const removeAttachedFile = () => {
   attachedFile.value = null;
   attachedFilePreview.value = null;
 };
-const triggerImageUpload = () => { 
-  imageUploadRef.value?.click();
-};
-const submitSendMessage = () => { 
+
+// triggerImageUpload is now handled directly in the template via click handlers for specific refs
+
+const submitSendMessage = () => {
   const text = messageInput.value.trim();
   if ((!text && !attachedFile.value) || props.isLoadingIndicator) return;
 
   emit('sendMessage', { text, file: attachedFile.value });
   messageInput.value = '';
   removeAttachedFile();
-  adjustTextareaHeight();
+  // adjustTextareaHeight will be called by watcher
   nextTick(() => textareaRef.value?.focus());
 };
-const handleModelUpdate = (newModel) => { 
+const handleModelUpdate = (newModel) => {
     emit('modelChanged', newModel);
     if (attachedFile.value && !isModelMultimodal(newModel)) {
         removeAttachedFile();
         showToast("Ảnh đính kèm đã được xoá do model mới không hỗ trợ.", "info");
     }
 };
-const handlePromptSelected = (prompt) => { 
+const handlePromptSelected = (prompt) => {
   messageInput.value = prompt;
   isPromptModalOpen.value = false;
-  nextTick(() => textareaRef.value?.focus());
+  nextTick(() => {
+    textareaRef.value?.focus();
+    adjustTextareaHeight(); // Ensure height is correct after setting value
+  });
 };
 
 defineExpose({
-    focusInput: () => textareaRef.value?.focus()
+    focusInput: () => {
+      nextTick(() => { // Ensure the correct textarea is in the DOM
+        textareaRef.value?.focus();
+      });
+    }
 });
 
 onMounted(()=>{
     if(props.apiKeyPresent){
+      nextTick(() => { // Ensure the correct textarea is in the DOM
         textareaRef.value?.focus();
+      });
     }
     if (typeof MutationObserver !== 'undefined') {
         iframeThemeObserver = new MutationObserver((mutationsList) => {
@@ -435,6 +517,19 @@ onUnmounted(() => {
     iframeThemeObserver.disconnect();
   }
 });
+
+// Watch for changes in conversation state to ensure the correct textareaRef is focused
+watch(
+  () => props.currentConversation,
+  () => {
+    nextTick(() => {
+      if (props.apiKeyPresent) {
+        textareaRef.value?.focus();
+      }
+    });
+  },
+  { immediate: true } // Also run on mount
+);
 
 </script>
 
@@ -486,9 +581,9 @@ onUnmounted(() => {
 .message-input {
   @apply flex-1 bg-transparent focus:outline-none text-gray-900 dark:text-slate-100 resize-none text-base;
   @apply placeholder-gray-500 dark:placeholder-slate-400;
-  min-height: 24px;
-  max-height: 120px;
-  line-height: 1.5;
+  min-height: 24px; /* Corresponds to rows="1" and line-height */
+  max-height: 120px; /* Approx 5 lines */
+  line-height: 1.5; /* Standard line height for better readability */
 }
 
 .send-button {
